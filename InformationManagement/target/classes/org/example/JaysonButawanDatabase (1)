@@ -1,0 +1,309 @@
+-- MySQL Administrator dump 1.4
+--
+-- ------------------------------------------------------
+-- Server version	5.5.5-10.4.32-MariaDB
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+
+
+--
+-- Create schema coffeeshop
+--
+
+CREATE DATABASE IF NOT EXISTS coffeeshop;
+USE coffeeshop;
+
+--
+-- Temporary table structure for view `customer_spending_summary`
+--
+DROP TABLE IF EXISTS `customer_spending_summary`;
+DROP VIEW IF EXISTS `customer_spending_summary`;
+CREATE TABLE `customer_spending_summary` (
+  `user_id` int(11),
+  `customer_name` varchar(101),
+  `total_spent` decimal(32,2)
+);
+
+--
+-- Temporary table structure for view `daily_sales_average`
+--
+DROP TABLE IF EXISTS `daily_sales_average`;
+DROP VIEW IF EXISTS `daily_sales_average`;
+CREATE TABLE `daily_sales_average` (
+  `daily_average` decimal(36,6)
+);
+
+--
+-- Temporary table structure for view `menumanagement`
+--
+DROP TABLE IF EXISTS `menumanagement`;
+DROP VIEW IF EXISTS `menumanagement`;
+CREATE TABLE `menumanagement` (
+  `coffee_name` varchar(200),
+  `price` decimal(10,2),
+  `quantity` decimal(32,0)
+);
+
+--
+-- Temporary table structure for view `ordertracking`
+--
+DROP TABLE IF EXISTS `ordertracking`;
+DROP VIEW IF EXISTS `ordertracking`;
+CREATE TABLE `ordertracking` (
+  `order_id` int(11),
+  `order_date` timestamp,
+  `quantity` decimal(32,0),
+  `fullname` varchar(101),
+  `total_price` decimal(32,2)
+);
+
+--
+-- Temporary table structure for view `sales_summary`
+--
+DROP TABLE IF EXISTS `sales_summary`;
+DROP VIEW IF EXISTS `sales_summary`;
+CREATE TABLE `sales_summary` (
+  `sale_date` date,
+  `coffee_name` varchar(200),
+  `quantity` int(11),
+  `customer_name` varchar(101),
+  `total_price` decimal(10,2)
+);
+
+--
+-- Temporary table structure for view `top_selling_items`
+--
+DROP TABLE IF EXISTS `top_selling_items`;
+DROP VIEW IF EXISTS `top_selling_items`;
+CREATE TABLE `top_selling_items` (
+  `coffee_name` varchar(200),
+  `total_quantity` decimal(32,0)
+);
+
+--
+-- Temporary table structure for view `view_coffee`
+--
+DROP TABLE IF EXISTS `view_coffee`;
+DROP VIEW IF EXISTS `view_coffee`;
+CREATE TABLE `view_coffee` (
+  `coffee_id` int(11),
+  `coffee_name` varchar(200),
+  `price` varchar(12)
+);
+
+--
+-- Definition of table `barista`
+--
+
+DROP TABLE IF EXISTS `barista`;
+CREATE TABLE `barista` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `barista`
+--
+
+/*!40000 ALTER TABLE `barista` DISABLE KEYS */;
+INSERT INTO `barista` (`id`,`username`,`password`) VALUES 
+ (1,'barista1','barista1'),
+ (2,'barista2','barista2');
+/*!40000 ALTER TABLE `barista` ENABLE KEYS */;
+
+
+--
+-- Definition of table `coffee`
+--
+
+DROP TABLE IF EXISTS `coffee`;
+CREATE TABLE `coffee` (
+  `coffee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `coffee_name` varchar(200) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`coffee_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `coffee`
+--
+
+/*!40000 ALTER TABLE `coffee` DISABLE KEYS */;
+INSERT INTO `coffee` (`coffee_id`,`coffee_name`,`price`) VALUES 
+ (1,'aaaa','250.00'),
+ (2,'french fries','250.00'),
+ (4,'Salted Caramel','200.00'),
+ (5,'Caffee latte','130.00');
+/*!40000 ALTER TABLE `coffee` ENABLE KEYS */;
+
+
+--
+-- Definition of table `order_items`
+--
+
+DROP TABLE IF EXISTS `order_items`;
+CREATE TABLE `order_items` (
+  `order_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `coffee_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `total_price` decimal(10,2) GENERATED ALWAYS AS (`quantity` * `price`) STORED,
+  PRIMARY KEY (`order_item_id`),
+  KEY `order_id` (`order_id`),
+  KEY `coffee_id` (`coffee_id`),
+  CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`),
+  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`coffee_id`) REFERENCES `coffee` (`coffee_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `order_items`
+--
+
+/*!40000 ALTER TABLE `order_items` DISABLE KEYS */;
+INSERT INTO `order_items` (`order_item_id`,`order_id`,`coffee_id`,`quantity`,`price`,`total_price`) VALUES 
+ (5,4,1,2,'250.00','500.00'),
+ (7,5,2,2,'250.00','500.00'),
+ (8,9,4,2,'200.00','400.00'),
+ (9,10,5,3,'130.00','390.00'),
+ (10,11,1,2,'250.00','500.00');
+/*!40000 ALTER TABLE `order_items` ENABLE KEYS */;
+
+
+--
+-- Definition of table `orders`
+--
+
+DROP TABLE IF EXISTS `orders`;
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `order_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `subtotal` decimal(10,2) DEFAULT NULL,
+  `tax` decimal(10,2) DEFAULT NULL,
+  `amount_paid` decimal(10,2) DEFAULT NULL,
+  `change_amount` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `orders`
+--
+
+/*!40000 ALTER TABLE `orders` DISABLE KEYS */;
+INSERT INTO `orders` (`order_id`,`user_id`,`order_date`,`subtotal`,`tax`,`amount_paid`,`change_amount`) VALUES 
+ (4,1,'2025-05-14 21:58:33',NULL,NULL,NULL,NULL),
+ (5,1,'2025-05-14 22:46:59',NULL,NULL,NULL,NULL),
+ (9,1,'2025-05-15 05:06:57','400.00','40.00','4000.00','3560.00'),
+ (10,1,'2025-05-15 05:20:46','390.00','39.00','4000.00','3571.00'),
+ (11,1,'2025-05-15 08:31:24','1750.00','175.00','2000.00','75.00');
+/*!40000 ALTER TABLE `orders` ENABLE KEYS */;
+
+
+--
+-- Definition of table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `firstname` varchar(50) NOT NULL,
+  `lastname` varchar(50) NOT NULL,
+  `user_name` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_name` (`user_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` (`id`,`firstname`,`lastname`,`user_name`,`password`,`created_at`) VALUES 
+ (1,'jayson','butawan','username123','username','2025-05-14 20:02:58'),
+ (2,'aa','aa','aa','$2a$10$iGxJ7PTmCS0lcoSPR3wsKej.DoMUxZ5ZCl9OcmaPLdrCIRqvupwqq','2025-05-15 17:27:01'),
+ (3,'www','www','www','b8b81dd7404f0bff2e43a40615807d1fa487b378e3827e8dd502f55a40028500','2025-05-15 17:37:02'),
+ (4,'er','er','era@gmail.com','$2a$10$VsI9EClyHX2qzXBN.YNm.ez7lqy112q9ZqR8RVzrhTjZOUmyIhQLK','2025-05-15 20:01:41');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+
+
+--
+-- Definition of view `customer_spending_summary`
+--
+
+DROP TABLE IF EXISTS `customer_spending_summary`;
+DROP VIEW IF EXISTS `customer_spending_summary`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `customer_spending_summary` AS select `u`.`id` AS `user_id`,concat(ucase(`u`.`firstname`),' ',ucase(`u`.`lastname`)) AS `customer_name`,sum(`oi`.`total_price`) AS `total_spent` from ((`users` `u` join `orders` `o` on(`u`.`id` = `o`.`user_id`)) join `order_items` `oi` on(`o`.`order_id` = `oi`.`order_id`)) group by `u`.`id`,concat(ucase(`u`.`firstname`),' ',ucase(`u`.`lastname`));
+
+--
+-- Definition of view `daily_sales_average`
+--
+
+DROP TABLE IF EXISTS `daily_sales_average`;
+DROP VIEW IF EXISTS `daily_sales_average`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `daily_sales_average` AS select avg(`daily_sales`.`daily_total`) AS `daily_average` from (select cast(`o`.`order_date` as date) AS `sale_date`,sum(`oi`.`total_price`) AS `daily_total` from (`order_items` `oi` join `orders` `o` on(`oi`.`order_id` = `o`.`order_id`)) group by cast(`o`.`order_date` as date)) `daily_sales`;
+
+--
+-- Definition of view `menumanagement`
+--
+
+DROP TABLE IF EXISTS `menumanagement`;
+DROP VIEW IF EXISTS `menumanagement`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `menumanagement` AS select `c`.`coffee_name` AS `coffee_name`,`c`.`price` AS `price`,coalesce(sum(`o_i`.`quantity`),0) AS `quantity` from (`coffee` `c` left join `order_items` `o_i` on(`o_i`.`coffee_id` = `c`.`coffee_id`)) group by `c`.`coffee_name`,`c`.`price`;
+
+--
+-- Definition of view `ordertracking`
+--
+
+DROP TABLE IF EXISTS `ordertracking`;
+DROP VIEW IF EXISTS `ordertracking`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `ordertracking` AS select `o`.`order_id` AS `order_id`,`o`.`order_date` AS `order_date`,sum(`oi`.`quantity`) AS `quantity`,concat(ucase(`u`.`firstname`),' ',ucase(`u`.`lastname`)) AS `fullname`,sum(`oi`.`total_price`) AS `total_price` from ((`orders` `o` join `order_items` `oi` on(`o`.`order_id` = `oi`.`order_id`)) join `users` `u` on(`o`.`user_id` = `u`.`id`)) group by `o`.`order_id`,`o`.`order_date`,`u`.`firstname`,`u`.`lastname`;
+
+--
+-- Definition of view `sales_summary`
+--
+
+DROP TABLE IF EXISTS `sales_summary`;
+DROP VIEW IF EXISTS `sales_summary`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `sales_summary` AS select cast(`o`.`order_date` as date) AS `sale_date`,`c`.`coffee_name` AS `coffee_name`,`oi`.`quantity` AS `quantity`,concat(ucase(trim(`u`.`firstname`)),' ',ucase(trim(`u`.`lastname`))) AS `customer_name`,`oi`.`total_price` AS `total_price` from (((`order_items` `oi` join `orders` `o` on(`oi`.`order_id` = `o`.`order_id`)) join `coffee` `c` on(`oi`.`coffee_id` = `c`.`coffee_id`)) join `users` `u` on(`o`.`user_id` = `u`.`id`));
+
+--
+-- Definition of view `top_selling_items`
+--
+
+DROP TABLE IF EXISTS `top_selling_items`;
+DROP VIEW IF EXISTS `top_selling_items`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `top_selling_items` AS select ucase(`c`.`coffee_name`) AS `coffee_name`,sum(`oi`.`quantity`) AS `total_quantity` from (`order_items` `oi` join `coffee` `c` on(`oi`.`coffee_id` = `c`.`coffee_id`)) group by `c`.`coffee_name` order by sum(`oi`.`quantity`) desc;
+
+--
+-- Definition of view `view_coffee`
+--
+
+DROP TABLE IF EXISTS `view_coffee`;
+DROP VIEW IF EXISTS `view_coffee`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `view_coffee` AS select `coffee`.`coffee_id` AS `coffee_id`,ucase(trim(`coffee`.`coffee_name`)) AS `coffee_name`,trim(`coffee`.`price`) AS `price` from `coffee`;
+
+
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
